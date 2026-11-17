@@ -329,6 +329,7 @@ function clientes(){
 }
 
 /* ---------- vistas ---------- */
+let EXTRAS={};fetch('extras.json?x='+Date.now(),{cache:'no-store'}).then(r=>r.json()).then(j=>{EXTRAS=j||{};if(ui.tab==='ajustes')render()}).catch(()=>{});
 function render(){
   $('#hNombre').textContent=S.config.nombre||'Mi Barbería';
   document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.v===ui.tab));
@@ -440,6 +441,7 @@ function vAjustes(){
     <label>Tu nombre (barbero)<input data-bid="${S.barberos[0].id}" value="${esc(S.barberos[0].nombre==='Barbero 1'?'':S.barberos[0].nombre)}" placeholder="Ej: Matías"></label>
     <div class="grid2"><label>Abre<input type="time" data-cfg="inicio" value="${esc(c.inicio)}"></label><label>Cierra<input type="time" data-cfg="fin" value="${esc(c.fin)}"></label></div>
     <label>Bloques de agenda<select data-cfg="intervalo">${[15,20,30,60].map(v=>`<option value="${v}" ${+c.intervalo===v?'selected':''}>Cada ${v} minutos</option>`).join('')}</select></label></div>
+  <h2>Herramientas</h2><div class="card herr"><div class="herr-ic">$</div><div class="herr-tx"><b>Contador de Bolsillo</b><small>Ganancias, IVA y lo del SII de tu negocio, en simple.</small></div>${EXTRAS.contador?`<a class="btn sm pri" href="${EXTRAS.contador}" target="_blank" rel="noopener">Descargar</a>`:`<span class="tag prueba">Muy pronto</span>`}</div>
   <h2>Diseño</h2><div class="card"><p class="hint">Elige cómo se ve tu app y tu página de reservas.</p><div class="temas">${Object.entries(window.SILLA_TEMAS||{}).map(([k,t])=>`<button class="tema ${(c.tema||'clasico')===k?'on':''}" data-act="tema" data-v="${k}"><div class="mini" style="background:${t.bg};border:1px solid ${t.line}"><i style="background:${t.acc};width:60%"></i><i style="background:${t.card2}"></i><i style="background:${t.card2};width:75%"></i></div><small>${t.nombre}</small></button>`).join('')}</div></div>
   <h2>Enlace de reservas</h2><div class="card">
     <p class="hint">Tus clientes ven solo tus horas libres y reservan al instante. La hora aparece sola en tu agenda.</p>
