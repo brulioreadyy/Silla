@@ -1,12 +1,13 @@
 // Plantillas de diseño de Silla (las usan la app y la página de reservas)
 window.SILLA_TEMAS = {
-  clasico: { nombre: 'Clásico dorado', bg: '#111113', card: '#1b1b1f', card2: '#24242a', line: '#2f2f36', txt: '#f4f4f5', mut: '#9d9da8', acc: '#e3a33b', acc2: '#f3c06a', onacc: '#1a1408', claro: false },
-  urbano:  { nombre: 'Urbano rojo',    bg: '#0e0e10', card: '#19191c', card2: '#232327', line: '#2f2f35', txt: '#f6f6f7', mut: '#9a9aa4', acc: '#e5484d', acc2: '#ff8589', onacc: '#ffffff', claro: false },
-  acero:   { nombre: 'Azul acero',     bg: '#0c131c', card: '#132030', card2: '#1a2a3d', line: '#253a52', txt: '#eef4fb', mut: '#8ea3bb', acc: '#3d9bff', acc2: '#86c2ff', onacc: '#ffffff', claro: false },
-  bosque:  { nombre: 'Verde bosque',   bg: '#0d1510', card: '#152119', card2: '#1c2b21', line: '#29402f', txt: '#eef6f0', mut: '#8fa898', acc: '#3fb871', acc2: '#7fdca6', onacc: '#08210f', claro: false },
-  claro:   { nombre: 'Claro elegante', bg: '#f6f4f0', card: '#ffffff', card2: '#f0ece5', line: '#e3ded5', txt: '#1d1c1a', mut: '#6f6b64', acc: '#1d1c1a', acc2: '#9a7a3e', onacc: '#ffffff', claro: true },
-  vintage: { nombre: 'Vintage burdeo', bg: '#f4ece1', card: '#fffaf3', card2: '#efe3d2', line: '#e0d1bb', txt: '#2b1d14', mut: '#7d6a58', acc: '#8b2635', acc2: '#b4504e', onacc: '#fff6ec', claro: true }
+  clasico: { nombre: 'Negro y oro',      bg: '#0c0b0a', card: '#171513', card2: '#211e1a', line: '#332d25', txt: '#f5efe6', mut: '#a59a8a', acc: '#c99a4b', acc2: '#ecc77e', onacc: '#1a1206', claro: false },
+  urbano:  { nombre: 'Barber pole',      bg: '#0b0e16', card: '#141a26', card2: '#1c2333', line: '#2b3448', txt: '#f3f5fa', mut: '#97a1b6', acc: '#c8323f', acc2: '#ff7d86', onacc: '#ffffff', claro: false },
+  vintage: { nombre: 'Whisky y cuero',   bg: '#120d09', card: '#1d1510', card2: '#281d15', line: '#3d2c1f', txt: '#f6ebdd', mut: '#b19d87', acc: '#c27a3a', acc2: '#e9a865', onacc: '#1c0f05', claro: false },
+  bosque:  { nombre: 'Verde inglés',     bg: '#08120d', card: '#0f1d16', card2: '#16281f', line: '#24402f', txt: '#eef4ee', mut: '#93ab9b', acc: '#c5a35e', acc2: '#e6c98a', onacc: '#13200f', claro: false },
+  acero:   { nombre: 'Navaja de acero',  bg: '#0d0f12', card: '#171a1f', card2: '#20242b', line: '#323842', txt: '#f1f3f6', mut: '#9aa2ae', acc: '#b9c2cf', acc2: '#e6ebf2', onacc: '#111418', claro: false },
+  claro:   { nombre: 'Marfil y negro',   bg: '#f3eee6', card: '#fffcf7', card2: '#ece4d7', line: '#ddd2c1', txt: '#1b1712', mut: '#6f665a', acc: '#1b1712', acc2: '#9b7537', onacc: '#f5e9d3', claro: true }
 };
+window.SILLA_ORDEN = ['clasico', 'urbano', 'vintage', 'bosque', 'acero', 'claro'];
 window.aplicarTema = function (id) {
   const t = window.SILLA_TEMAS[id] || window.SILLA_TEMAS.clasico;
   const r = document.documentElement.style;

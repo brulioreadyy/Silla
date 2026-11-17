@@ -61,6 +61,7 @@ input:focus{outline:none;border-color:var(--acc)}
 .err{color:var(--bad);font-size:14px;margin-bottom:8px}
 .pie{text-align:center;color:var(--mut);font-size:12px;margin-top:30px;opacity:.7}
 </style>
+<link rel="stylesheet" href="premium.css">
 </head>
 <body>
 <div class="wrap" id="app"><div class="skel" style="height:96px"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
@@ -82,7 +83,7 @@ const WA='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="cu
 const CAL='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>';
 const OK='<svg width="64" height="64" viewBox="0 0 48 48" fill="none"><circle cx="24" cy="24" r="22" fill="rgba(63,184,113,.15)" stroke="#3fb871" stroke-width="2"/><path d="M14 25l7 7 13-15" stroke="#3fb871" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-const codigo=new URLSearchParams(location.search).get('b')||'';
+const codigo=new URLSearchParams(location.search).get('b')||(()=>{const p=decodeURIComponent(location.pathname.split('/').filter(Boolean).pop()||'');return /^(r|r\.html|silla|index\.html)$/i.test(p)?'':p})();
 let P=null,ocupado=[],ahora=null,activo=true;
 let sel={s:null,f:null,h:null};
 let datos=(()=>{try{return JSON.parse(localStorage.getItem('silla_cliente'))||{}}catch(e){return{}}})();

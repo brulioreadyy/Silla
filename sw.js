@@ -1,6 +1,6 @@
 // Silla: guarda la app en el celular para que funcione sin internet.
-const VERSION = 'silla-v3';
-const ARCHIVOS = ['./', './index.html', './reserva.html', './r.html', './temas.js', './manifest.webmanifest',
+const VERSION = 'silla-v4';
+const ARCHIVOS = ['./', './index.html', './reserva.html', './r.html', './temas.js', './premium.css', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './icon-maskable.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {

@@ -158,6 +158,7 @@ textarea{min-height:92px;resize:vertical}
 h1,h2,h3,b,strong{letter-spacing:-.01em}
 .sync{font-size:12px;color:var(--mut);text-align:center;margin-top:16px}
 </style>
+<link rel="stylesheet" href="premium.css">
 </head>
 <body>
 <header><div class="brand"><img class="logo" src="icon-192.png" alt="" width="38" height="38" style="border-radius:11px"><div><h1 id="hNombre">Mi Barbería</h1><small id="hSync">Silla · agenda</small></div></div></header>
@@ -225,7 +226,7 @@ function ic(n,cls){if(n==='pole')return POLE;return'<svg class="i '+(cls||'')+'"
 const POLE='<svg width="38" height="38" viewBox="0 0 44 44" aria-hidden="true"><defs><clipPath id="pc"><rect x="15" y="8" width="14" height="28" rx="3"/></clipPath></defs><rect width="44" height="44" rx="12" fill="#1c1c1f" stroke="#303036"/><g clip-path="url(#pc)"><rect x="15" y="8" width="14" height="28" fill="#f3f3f3"/><g stroke-width="5"><path d="M8 18 36 4M8 30 36 16M8 42 36 28" stroke="#e5534b"/><path d="M8 24 36 10M8 36 36 22" stroke="#4a9eff"/></g></g><rect x="13" y="5" width="18" height="4" rx="2" fill="#e3a33b"/><rect x="13" y="35" width="18" height="4" rx="2" fill="#e3a33b"/></svg>';
 const DIAS=['Do','Lu','Ma','Mi','Ju','Vi','Sá'];
 const API='https://script.google.com/macros/s/AKfycbzVAXe-wM8xVHy9DOyh-EbtR9cfySFpLNvnYqR4-ZqMQR1GYJzkrj-Sovw02bKuq2AH/exec';
-const VERSION_APP='2.0';
+const VERSION_APP='2.1';
 const LKEY='silla_lic';
 
 const ESTADOS={pendiente:{t:'Pendiente',c:'p'},confirmada:{t:'Confirmada',c:'c'},atendido:{t:'Atendido',c:'a'},novino:{t:'No vino',c:'n'}};
@@ -580,7 +581,7 @@ function pedirRegistro(){
 }
 
 /* ---------- enlace de reservas y solicitudes ---------- */
-function enlaceReserva(){const c=licCodigo();return c?SILLA_URL+'r?b='+encodeURIComponent(c):''}
+function enlaceReserva(){const c=licCodigo();return c?SILLA_URL+encodeURIComponent(c):''}
 function compartirHTML(){
   if(!licCodigo())return`<p class="hint">Conéctate a internet para generar tu enlace de reservas.</p>`;
   const L=enlaceReserva(),n=S.config.nombre,msg='Reserva tu hora en '+n+' aquí: ';
