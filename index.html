@@ -123,6 +123,19 @@ textarea{min-height:92px;resize:vertical}
 .warn{color:var(--acc2)!important;font-size:14px;min-height:0}
 #toast{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:#2c2c31;border:1px solid var(--line);padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:30;white-space:nowrap}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.banner{display:flex;align-items:center;gap:10px;border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:14px;cursor:pointer;border:1px solid}
+.banner.info{background:rgba(227,163,59,.12);border-color:rgba(227,163,59,.4);color:var(--acc2)}
+.banner.mal{background:rgba(229,83,75,.12);border-color:rgba(229,83,75,.45);color:#ff9d97}
+.banner b{color:var(--txt)}
+#bloqueo{position:fixed;inset:0;background:var(--bg);z-index:40;display:none;align-items:center;justify-content:center;padding:24px}
+#bloqueo.on{display:flex}
+#bloqueo .box{max-width:420px;width:100%;text-align:center}
+#bloqueo h2{font-size:22px;color:var(--txt);text-transform:none;letter-spacing:0;margin:14px 0 8px}
+#bloqueo p{color:var(--mut);line-height:1.5;margin-bottom:14px}
+.plan{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.plan b{font-size:18px}
+.tag{font-size:12px;padding:4px 10px;border-radius:99px;font-weight:600}
+.tag.prueba{background:rgba(74,158,255,.15);color:#7fb8ff}.tag.pagado{background:rgba(63,184,113,.15);color:#7be3a4}.tag.vencido,.tag.bloqueado{background:rgba(229,83,75,.15);color:#ff9d97}
 .sync{font-size:12px;color:var(--mut);text-align:center;margin-top:16px}
 </style>
 </head>
@@ -138,6 +151,7 @@ textarea{min-height:92px;resize:vertical}
 </nav>
 <div id="modal"><div class="sheet"></div></div>
 <div id="toast"></div>
+<div id="bloqueo"><div class="box" id="bloqueoBox"></div></div>
 <script>
 (function(){
 "use strict";
@@ -190,6 +204,9 @@ const P={
 function ic(n,cls){if(n==='pole')return POLE;return'<svg class="i '+(cls||'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(P[n]||'')+'</svg>'}
 const POLE='<svg width="38" height="38" viewBox="0 0 44 44" aria-hidden="true"><defs><clipPath id="pc"><rect x="15" y="8" width="14" height="28" rx="3"/></clipPath></defs><rect width="44" height="44" rx="12" fill="#1c1c1f" stroke="#303036"/><g clip-path="url(#pc)"><rect x="15" y="8" width="14" height="28" fill="#f3f3f3"/><g stroke-width="5"><path d="M8 18 36 4M8 30 36 16M8 42 36 28" stroke="#e5534b"/><path d="M8 24 36 10M8 36 36 22" stroke="#4a9eff"/></g></g><rect x="13" y="5" width="18" height="4" rx="2" fill="#e3a33b"/><rect x="13" y="35" width="18" height="4" rx="2" fill="#e3a33b"/></svg>';
 const DIAS=['Do','Lu','Ma','Mi','Ju','Vi','Sá'];
+const API='https://script.google.com/macros/s/AKfycbzVAXe-wM8xVHy9DOyh-EbtR9cfySFpLNvnYqR4-ZqMQR1GYJzkrj-Sovw02bKuq2AH/exec';
+const VERSION_APP='1.1';
+const LKEY='silla_lic';
 
 const ESTADOS={pendiente:{t:'Pendiente',c:'p'},confirmada:{t:'Confirmada',c:'c'},atendido:{t:'Atendido',c:'a'},novino:{t:'No vino',c:'n'}};
 
@@ -300,6 +317,7 @@ function render(){
   else if(ui.tab==='clientes'){m.innerHTML=vClientes();pintarClientes()}
   else if(ui.tab==='caja')m.innerHTML=vCaja();
   else{m.innerHTML=vAjustes();pintarQR()}
+  pintarBloqueo();
 }
 
 function citaCard(c){
@@ -334,7 +352,7 @@ function vAgenda(){
   const activas=dia.filter(c=>c.estado!=='novino');
   const esperado=activas.reduce((s,c)=>s+(+c.precio||0),0);
   const hecho=dia.filter(c=>c.estado==='atendido').reduce((s,c)=>s+(+c.precio||0),0);
-  let h=`<div class="daynav"><button class="arrow" data-act="dia" data-v="-1" aria-label="Día anterior">‹</button>
+  let h=bannerPlan()+`<div class="daynav"><button class="arrow" data-act="dia" data-v="-1" aria-label="Día anterior">‹</button>
     <div class="mid"><strong>${esc(fechaLarga(f))}</strong><span>${esHoy?'Hoy':'Toca para elegir fecha · '+(f<hoy()?'pasado':'próximo')}</span><input type="date" class="pick" value="${f}" aria-label="Elegir fecha"></div>
     <button class="arrow" data-act="dia" data-v="1" aria-label="Día siguiente">›</button></div>`;
   h+=`<div class="chips">${esHoy?'':'<button class="chip" data-act="dia" data-v="0">Volver a hoy</button>'}<button class="chip" data-act="pegar" style="display:inline-flex;align-items:center;gap:6px">${ic('inbox')}Pegar solicitud</button></div>`;
@@ -395,7 +413,7 @@ function vCaja(){
 
 function vAjustes(){
   const c=S.config,durs=[15,30,45,60,75,90,120];
-  return`<h2>Tu barbería</h2><div class="card">
+  return`<h2>Tu plan</h2><div class="card">${planHTML()}</div><h2>Tu barbería</h2><div class="card">
     <label>Nombre de la barbería<input data-cfg="nombre" value="${esc(c.nombre)}"></label>
     <label>Tu nombre (barbero)<input data-bid="${S.barberos[0].id}" value="${esc(S.barberos[0].nombre==='Barbero 1'?'':S.barberos[0].nombre)}" placeholder="Ej: Matías"></label>
     <div class="grid2"><label>Abre<input type="time" data-cfg="inicio" value="${esc(c.inicio)}"></label><label>Cierra<input type="time" data-cfg="fin" value="${esc(c.fin)}"></label></div>
@@ -418,6 +436,62 @@ function vAjustes(){
     <div class="row"><button class="btn" data-act="importar">Restaurar respaldo</button></div>
     <div class="row" style="margin-top:14px"><button class="btn danger" data-act="borrar-todo">Borrar todas las horas</button></div></div>
   <p class="sync">Tus datos se guardan en este celular y Silla funciona sin internet. Copia un respaldo de vez en cuando.</p>`;
+}
+
+/* ---------- plan y suscripción ---------- */
+let L=(()=>{try{return JSON.parse(localStorage.getItem(LKEY))||{}}catch(e){return{}}})();
+function saveL(){try{localStorage.setItem(LKEY,JSON.stringify(L))}catch(e){}}
+if(!L.id){L.id='s'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);L.primera=hoy();saveL()}
+const diasEntre=(a,b)=>Math.round((parse(b)-parse(a))/864e5);
+function plan(){
+  const hasta=L.hasta||addDays(L.primera||hoy(),30),gracia=L.gracia!=null?+L.gracia:5,d=diasEntre(hoy(),hasta);
+  let estado=L.estado==='pagado'&&d>=0?'pagado':(d>=0?'prueba':(d>=-gracia?'vencido':'bloqueado'));
+  return{estado,hasta,dias:d,quedaGracia:gracia+d,precio:L.precio||4990,cobro:L.cobro||'',transferir:L.transferir||''};
+}
+let verificando=false;
+async function verificar(manual){
+  if(verificando)return;
+  if(!S.config.registrado){if(manual)pedirRegistro();return}
+  verificando=true;
+  try{
+    const q=new URLSearchParams({id:L.id,nombre:(S.barberos[0]||{}).nombre||'',barberia:S.config.nombre||'',whatsapp:S.config.whatsapp||'',v:VERSION_APP});
+    const ctl=new AbortController(),t=setTimeout(()=>ctl.abort(),12000);
+    const r=await fetch(API+'?'+q.toString(),{signal:ctl.signal});clearTimeout(t);
+    const j=await r.json();
+    if(j&&j.ok){Object.assign(L,{estado:j.estado,hasta:j.hasta,gracia:j.gracia,precio:j.precio,cobro:j.cobro,transferir:j.transferir,revisado:Date.now()});saveL();if(manual)toast('Plan actualizado')}
+  }catch(e){if(manual)toast('Sin conexión: inténtalo con internet')}
+  verificando=false;render();
+}
+function waCobro(){const p=plan();const n=normTel(p.cobro);if(!n)return'';
+  return waLink(n,'Hola, quiero pagar mi plan de Silla ('+clp(p.precio)+'/mes).\nBarbería: '+(S.config.nombre||'')+'\nNombre: '+((S.barberos[0]||{}).nombre||'')+'\nID: '+L.id)}
+function bannerPlan(){
+  const p=plan();
+  if(p.estado==='prueba'&&p.dias<=7)return`<div class="banner info" data-act="ver-plan">${ic('star')}<span>${p.dias===0?'Tu prueba gratis termina <b>hoy</b>':'Te quedan <b>'+p.dias+' día'+(p.dias===1?'':'s')+'</b> de prueba gratis'}. Toca para ver cómo seguir.</span></div>`;
+  if(p.estado==='vencido')return`<div class="banner mal" data-act="ver-plan">${ic('x')}<span>Tu plan venció. Tienes <b>${p.quedaGracia} día${p.quedaGracia===1?'':'s'}</b> para pagar antes de que Silla se pause.</span></div>`;
+  return'';
+}
+function planHTML(){
+  const p=plan(),wa=waCobro();
+  const txt={prueba:'Prueba gratis',pagado:'Plan activo',vencido:'Vencido',bloqueado:'Pausado'}[p.estado];
+  return`<div class="plan"><b>${clp(p.precio)}<span style="font-size:13px;color:var(--mut);font-weight:400"> / mes</span></b><span class="tag ${p.estado}">${txt}</span></div>
+    <p class="hint" style="margin:0 0 10px">${p.estado==='pagado'?'Pagado hasta el '+fechaLarga(p.hasta)+'.':p.estado==='prueba'?'Gratis hasta el '+fechaLarga(p.hasta)+'.':'Venció el '+fechaLarga(p.hasta)+'.'}</p>
+    ${p.transferir?`<div class="linkbox" style="max-height:none">${esc(p.transferir)}</div>`:''}
+    <div class="row">${wa?`<a class="btn pri" href="${esc(wa)}" target="_blank" rel="noopener" style="text-decoration:none">${ic('wa')}Pagar por WhatsApp</a>`:''}<button class="btn" data-act="revisar-plan">${ic('undo')}Ya pagué: revisar</button></div>
+    <p class="hint" style="margin-top:10px">Tu ID: ${esc(L.id)}</p>`;
+}
+function pintarBloqueo(){
+  const el=$('#bloqueo'),p=plan();
+  if(p.estado!=='bloqueado'){el.classList.remove('on');return}
+  $('#bloqueoBox').innerHTML=`${ic('pole')}<h2>Silla está en pausa</h2><p>Tu plan venció el ${esc(fechaLarga(p.hasta))}. Tus horas y clientes están guardados; paga tu plan para seguir usándola.</p><div class="card" style="text-align:left">${planHTML()}</div><button class="btn" data-act="copiar" style="width:100%;margin-top:6px">${ic('copy')}Copiar respaldo</button>`;
+  el.classList.add('on');
+}
+function pedirRegistro(){
+  const b=S.barberos[0]||{};
+  modal(`<h3>Bienvenido a Silla</h3><p>Completa tus datos para empezar tu <b style="color:var(--txt)">prueba gratis de 30 días</b>.</p>
+  <form id="freg"><label>Tu nombre<input name="nombre" required value="${esc(b.nombre==='Barbero 1'?'':b.nombre||'')}" placeholder="Ej: Matías"></label>
+  <label>Nombre de tu barbería<input name="barberia" required value="${esc(S.config.nombre==='Mi Barbería'?'':S.config.nombre)}" placeholder="Ej: Barbería El Corte"></label>
+  <label>Tu WhatsApp<input name="whatsapp" type="tel" inputmode="tel" required value="${esc(S.config.whatsapp||'')}" placeholder="9 1234 5678"></label>
+  <div class="row"><button class="btn pri" type="submit">Empezar</button></div></form>`);
 }
 
 /* ---------- enlace de reservas y solicitudes ---------- */
@@ -539,6 +613,8 @@ const A={
   rango:el=>{ui.rango=el.dataset.v;render()},
   'dia-at':el=>{const d=+el.dataset.v;let ds=(S.config.dias||[]).slice();ds=ds.indexOf(d)>=0?ds.filter(x=>x!==d):ds.concat(d);if(!ds.length){toast('Deja al menos un día');return}S.config.dias=ds.sort();touch('config');render()},
   'copiar-enlace':()=>copiarEnlace(),
+  'ver-plan':()=>{ui.tab='ajustes';render();window.scrollTo(0,0)},
+  'revisar-plan':()=>verificar(true),
   compartir:()=>{try{navigator.share({title:'Reserva tu hora en '+S.config.nombre,text:'Reserva tu hora en '+S.config.nombre+' aquí:',url:enlaceReserva()}).catch(()=>{})}catch(e){copiarEnlace()}},
   ig:()=>copiarEnlace(ok=>modal(`<h3>Compartir en Instagram</h3><p>${ok?'Ya copiamos tu enlace.':'Primero copia el enlace del cuadro (mantén presionado y Copiar).'} Ahora pégalo en Instagram:</p>
     <div class="sol"><div><span>En tu perfil</span>Editar perfil → Enlaces</div><div><span>En una historia</span>Sticker "Enlace"</div><div><span>Con el QR</span>Sube el pantallazo</div></div>
@@ -579,7 +655,12 @@ document.addEventListener('click',e=>{
   const f=A[el.dataset.act];if(f){if(el.tagName!=='A')e.preventDefault();f(el)}
 });
 document.addEventListener('focusin',e=>{if(e.target.classList&&e.target.classList.contains('linkta'))setTimeout(()=>e.target.select(),0)});
-document.addEventListener('submit',e=>{if(e.target.id==='fcita'){e.preventDefault();guardarCita(e.target)}});
+document.addEventListener('submit',e=>{
+  if(e.target.id==='fcita'){e.preventDefault();guardarCita(e.target)}
+  if(e.target.id==='freg'){e.preventDefault();const f=new FormData(e.target),v=k=>String(f.get(k)||'').trim();
+    if(!v('nombre')||!v('barberia')||normTel(v('whatsapp')).length<11){toast('Revisa tu WhatsApp (9 dígitos)');return}
+    S.barberos[0].nombre=v('nombre');S.config.nombre=v('barberia');S.config.whatsapp=v('whatsapp');S.config.registrado=true;touch('config');cerrar();render();toast('¡Listo! Tu prueba gratis empezó');verificar(false)}
+});
 document.addEventListener('input',e=>{
   const el=e.target;
   if(el.id==='buscar'){ui.buscar=el.value;pintarClientes()}
@@ -598,6 +679,9 @@ document.querySelectorAll('[data-ic]').forEach(el=>{el.innerHTML=ic(el.dataset.i
 render();
 revisarHash();
 window.addEventListener('hashchange',revisarHash);
+if(!S.config.registrado&&!location.hash)setTimeout(pedirRegistro,400);else verificar(false);
+window.addEventListener('online',()=>verificar(false));
+setInterval(()=>verificar(false),6*3600*1000);
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){try{navigator.serviceWorker.register('sw.js').catch(()=>{})}catch(e){}}
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 setSync(S.citas.length?'guardado en este equipo':'agenda');
